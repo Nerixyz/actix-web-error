@@ -51,7 +51,7 @@ impl Attrs<'_> {
         let mut attrs = Attrs { status: None };
 
         for attr in input {
-            if attr.path.is_ident("status") {
+            if attr.path().is_ident("status") {
                 attrs.parse_status_attribute(attr)?;
             }
         }
