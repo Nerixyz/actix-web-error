@@ -14,7 +14,7 @@ authors = ["Nerixyz"]
 members = ["derive"]
 
 [dependencies]
-actix-web-error-derive = { version = "=0.1.0", path = "derive" }
+actix-web-error-derive = { version = "=0.2.0", path = "derive" }
 serde = "1.0"
 
 [dev-dependencies]
