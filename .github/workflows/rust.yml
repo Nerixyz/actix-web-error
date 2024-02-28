@@ -2,19 +2,20 @@ name: Rust
 
 on:
   push:
-    branches: ["master"]
+    branches: [master, main]
   pull_request:
-    branches: ["master"]
-
-env:
-  CARGO_TERM_COLOR: always
+    branches: [master, main]
 
 jobs:
   build:
     name: Build and Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          components: clippy
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
       - name: Build
