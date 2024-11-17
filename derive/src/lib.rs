@@ -1,3 +1,6 @@
+#![warn(clippy::cargo)]
+#![warn(clippy::pedantic)]
+
 extern crate proc_macro;
 
 mod attr;

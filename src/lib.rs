@@ -43,7 +43,7 @@ pub mod __private {
     #[repr(transparent)]
     pub struct JsonErrorSerialize<'a, T>(pub &'a T);
 
-    impl<'a, T> Serialize for JsonErrorSerialize<'a, T>
+    impl<T> Serialize for JsonErrorSerialize<'_, T>
     where
         T: Display,
     {

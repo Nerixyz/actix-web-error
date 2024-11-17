@@ -11,7 +11,6 @@ pub enum Input<'a> {
 }
 
 pub struct Struct<'a> {
-    pub original: &'a DeriveInput,
     pub attrs: Attrs<'a>,
     pub ident: Ident,
     pub generics: &'a Generics,
@@ -19,23 +18,18 @@ pub struct Struct<'a> {
 }
 
 pub struct Enum<'a> {
-    pub original: &'a DeriveInput,
-    pub attrs: Attrs<'a>,
     pub ident: Ident,
     pub generics: &'a Generics,
     pub variants: Vec<Variant<'a>>,
 }
 
 pub struct Variant<'a> {
-    pub original: &'a syn::Variant,
     pub attrs: Attrs<'a>,
     pub ident: Ident,
     pub fields: Vec<Field<'a>>,
 }
 
 pub struct Field<'a> {
-    pub original: &'a syn::Field,
-    pub attrs: Attrs<'a>,
     pub member: Member,
     pub ty: &'a Type,
     pub contains_generic: bool,
@@ -59,9 +53,8 @@ impl<'a> Struct<'a> {
         let attrs = Attrs::get(&node.attrs)?;
         let scope = TypeParams::new(&node.generics);
         let span = attrs.span().unwrap_or_else(Span::call_site);
-        let fields = Field::multiple_from_syn(&data.fields, &scope, span)?;
+        let fields = Field::multiple_from_syn(&data.fields, &scope, span);
         Ok(Struct {
-            original: node,
             attrs,
             ident: node.ident.clone(),
             generics: &node.generics,
@@ -81,14 +74,12 @@ impl<'a> Enum<'a> {
             .map(|node| {
                 let mut variant = Variant::from_syn(node, &scope, span)?;
                 if let display @ None = &mut variant.attrs.status {
-                    *display = attrs.status.clone();
+                    display.clone_from(&attrs.status);
                 }
                 Ok(variant)
             })
             .collect::<Result<_>>()?;
         Ok(Enum {
-            original: node,
-            attrs,
             ident: node.ident.clone(),
             generics: &node.generics,
             variants,
@@ -101,20 +92,15 @@ impl<'a> Variant<'a> {
         let attrs = Attrs::get(&node.attrs)?;
         let span = attrs.span().unwrap_or(span);
         Ok(Variant {
-            original: node,
             attrs,
             ident: node.ident.clone(),
-            fields: Field::multiple_from_syn(&node.fields, scope, span)?,
+            fields: Field::multiple_from_syn(&node.fields, scope, span),
         })
     }
 }
 
 impl<'a> Field<'a> {
-    fn multiple_from_syn(
-        fields: &'a Fields,
-        scope: &TypeParams<'a>,
-        span: Span,
-    ) -> Result<Vec<Self>> {
+    fn multiple_from_syn(fields: &'a Fields, scope: &TypeParams<'a>, span: Span) -> Vec<Self> {
         fields
             .iter()
             .enumerate()
@@ -122,15 +108,8 @@ impl<'a> Field<'a> {
             .collect()
     }
 
-    fn from_syn(
-        i: usize,
-        node: &'a syn::Field,
-        scope: &TypeParams<'a>,
-        span: Span,
-    ) -> Result<Self> {
-        Ok(Field {
-            original: node,
-            attrs: Attrs::get(&node.attrs)?,
+    fn from_syn(i: usize, node: &'a syn::Field, scope: &TypeParams<'a>, span: Span) -> Self {
+        Field {
             member: node.ident.clone().map_or_else(
                 || {
                     Member::Unnamed(Index {
@@ -142,6 +121,6 @@ impl<'a> Field<'a> {
             ),
             ty: &node.ty,
             contains_generic: scope.intersects(&node.ty),
-        })
+        }
     }
 }

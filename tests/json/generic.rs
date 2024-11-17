@@ -2,11 +2,7 @@ use crate::common::expect_response;
 use actix_web::{http::StatusCode, ResponseError};
 use std::fmt::Display;
 
-trait MyTrait: Display {
-    fn status() -> StatusCode {
-        StatusCode::INTERNAL_SERVER_ERROR
-    }
-}
+trait MyTrait: Display {}
 
 #[derive(Debug, thiserror::Error)]
 #[error("my error")]
